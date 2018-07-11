@@ -578,28 +578,33 @@ void Md2QmEngine::getIntCoords(string &file,
     std::ifstream intt;
     intt.open(file.c_str());
 
+    int linecount = 0;
+
     if (intt.is_open() ) {
         while ( intt.good() ) {
             std::getline(intt, line);
 
-            vector< string > split;
-            Tokenizer toker(line, " \t");
-            toker.ToVector(split);
-            if ( !split.size()      ||
-                  split.size() != 4 ||
-                  split[0] == "#"   ||
-                  split[0].substr(0,1) == "#" ) { continue; }
+            if (linecount > 1) {
+              vector< string > split;
+              Tokenizer toker(line, " \t");
+              toker.ToVector(split);
+              if ( !split.size()      ||
+                    split.size() != 4 ||
+                    split[0] == "#"   ||
+                    split[0].substr(0,1) == "#" ) { continue; }
 
-            // Interesting information written here: e.g. 'C 0.000 0.000 0.000'
-            atomCount++;
-            string element = split[0];
-            double x = boost::lexical_cast<double>( split[1] ) / 10.; //°A to NM
-            double y = boost::lexical_cast<double>( split[2] ) / 10.;
-            double z = boost::lexical_cast<double>( split[3] ) / 10.;
-            vec qmPos = vec(x,y,z);
+              // Interesting information written here: e.g. 'C 0.000 0.000 0.000'
+              atomCount++;
+              string element = split[0];
+              double x = boost::lexical_cast<double>( split[1] ) / 10.; //°A to NM
+              double y = boost::lexical_cast<double>( split[2] ) / 10.;
+              double z = boost::lexical_cast<double>( split[3] ) / 10.;
+              vec qmPos = vec(x,y,z);
 
-            pair<string, vec> qmTypePos(element, qmPos);
-            intCoords[atomCount] = qmTypePos;
+              pair<string, vec> qmTypePos(element, qmPos);
+              intCoords[atomCount] = qmTypePos;
+            }
+            linecount += 1;
         }
     }
     else {
