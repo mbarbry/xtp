@@ -71,7 +71,7 @@ namespace votca {
                     if(!atom->HasQMPart()){
                       continue;
                     }
-                    tools::vec pos = atom->getQMPos() * tools::conv::nm2bohr;
+                    tools::vec pos = atom->getPos() * tools::conv::nm2bohr;
                     std::string name = atom->getElement();
                     QMAtom* qmatom = new QMAtom(AtomId,name, pos);
                     AtomId++;

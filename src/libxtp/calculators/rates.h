@@ -383,6 +383,8 @@ void Rates::EvaluatePair(ctp::Topology *top, ctp::QMPair *qmpair) {
 //        return;
 //    }
 
+    std::cout << "\npair_has_e: " << pair_has_e << "\n";
+    std::cout << "pair_has_h: " << pair_has_h << "\n";
     if (pair_has_e) {
         this->CalculateRate(top, qmpair, -1);
     }
@@ -417,6 +419,8 @@ void Rates::CalculateRate(ctp::Topology *top, ctp::QMPair *qmpair, int state) {
     double reorg21=0;
     double dG_Site=0;
     double dG_Field=0;
+
+    printf("\nHola!! Rates\n");
     
     if (state<2){
         reorg12  = seg1->getU_nC_nN(state)                 // 1->2
@@ -538,6 +542,9 @@ void Rates::CalculateRate(ctp::Topology *top, ctp::QMPair *qmpair, int state) {
         reorg12 = reorg12 + lOut;
         reorg21 = reorg21 + lOut;
 
+        printf("\n J2 = %f, reorg12 = %f, reorg21 = %f, lout = %f, dG = %f, exp = %f\n",
+            J2, reorg12, reorg21, lOut, dG, exp( - (-dG + reorg21)*(-dG + reorg21) / (4*_kT*reorg21) ));
+
         rate12 = J2 / hbar_eV * sqrt( M_PI / (reorg12*_kT) )
                 * exp( - (+dG + reorg12)*(+dG + reorg12) / (4*_kT*reorg12) );
 
@@ -612,6 +619,10 @@ void Rates::CalculateRate(ctp::Topology *top, ctp::QMPair *qmpair, int state) {
                 rate_symm12 << " " << " " << rate_symm21 << " " <<
                 _rate_symm12 << " " <<  _rate_symm21 << std::endl;
     }
+
+    std::cout << "Rates: state = " << state << 
+                 " rate 12: " << rate12 <<
+                 " rate 21: " << rate21 << "\n";
 
     qmpair->setRate12(rate12, state);
     qmpair->setRate21(rate21, state);

@@ -247,8 +247,13 @@ namespace votca {
 
       path arg_path, arg_pathA, arg_pathB, arg_pathAB;
 
-      string orbFileA = (arg_pathA / eqm_work_dir / "molecules_eqm" / frame_dir / (format("%1%_%2%%3%") % "molecule" % ID_A % ".orb").str()).c_str();
-      string orbFileB = (arg_pathB / eqm_work_dir / "molecules_eqm" / frame_dir / (format("%1%_%2%%3%") % "molecule" % ID_B % ".orb").str()).c_str();
+      string orbFileA = (arg_pathA / eqm_work_dir / "molecules_gwbse" / frame_dir / (format("%1%_%2%%3%") % "molecule" % ID_A % ".orb").str()).c_str();
+      std::cout << "\nOrbital file name: " << orbFileA << "\n";
+      std::cout << "arg_pathA: " << arg_pathA  << "\n";
+      std::cout << "eqm_work_dir: " << eqm_work_dir  << "\n";
+      std::cout << "frame_dir: " << frame_dir << "\n";
+
+      string orbFileB = (arg_pathB / eqm_work_dir / "molecules_gwbse" / frame_dir / (format("%1%_%2%%3%") % "molecule" % ID_B % ".orb").str()).c_str();
       string orbFileAB = (arg_pathAB / iqm_work_dir / "pairs_iqm" / frame_dir / (format("%1%%2%%3%%4%%5%") % "pair_" % ID_A % "_" % ID_B % ".orb").str()).c_str();
       string _orb_dir = (arg_path / iqm_work_dir / "pairs_iqm" / frame_dir).c_str();
 
@@ -562,6 +567,8 @@ namespace votca {
         for(Property* state:dftprop.Select("coupling")){
           int state1 = state->getAttribute<int>("levelA");
           int state2 = state->getAttribute<int>("levelB");
+          printf("stateA = %d, stateB = %d, state1 = %d, state2 = %d\n", stateA, stateB, 
+              state1, state2);
           if (state1 == stateA && state2 == stateB) {
             J=state->getAttribute<double>("jAB");
             break;
@@ -672,13 +679,14 @@ namespace votca {
             tools::Property& dftprop=pair_property->get("dftcoupling");
             int homoA=dftprop.getAttribute<int>("homoA");
             int homoB=dftprop.getAttribute<int>("homoB");
+            std::cout << "\n dftprop.exists elec: " << dftprop.exists("electrons") << "\n";
             if(dftprop.exists("holes")){
               tools::Property& holes =dftprop.get("holes");
               int stateA = _hole_levels[segmentA->getName()];
               int stateB = _hole_levels[segmentB->getName()];
-              int levelA=homoA-stateA+1; //h1 is is homo;
-              int levelB=homoB-stateB+1;
-              double J=GetDFTCouplingFromProp(holes, stateA, stateB);
+              int levelA = homoA-stateA; //h1 is is homo;
+              int levelB = homoB-stateB;
+              double J=GetDFTCouplingFromProp(holes, levelA, levelB);
               pair->setJeff2(J*J, 1);
               pair->setIsPathCarrier(true, 1);
             }
@@ -686,9 +694,11 @@ namespace votca {
               tools::Property& electrons =dftprop.get("electrons");
               int stateA = _electron_levels[segmentA->getName()];
               int stateB = _electron_levels[segmentB->getName()];
-              int levelA=homoA+stateA; //e1 is homo+1 state starts at 1;
-              int levelB=homoB+stateB;
-              double J=GetDFTCouplingFromProp(electrons, stateA, stateB);
+              int levelA = homoA + stateA + 1; //e1 is homo+1 state starts at 1;
+              int levelB = homoB + stateB + 1;
+              double J=GetDFTCouplingFromProp(electrons, levelA, levelB);
+              printf("DFT coupling elec: %f | homoA = %d, state A = %d, levelA = %d\n", 
+                  J, homoA, stateA, levelA);
               pair->setJeff2(J*J, -1);
               pair->setIsPathCarrier(true, -1);
              }
